@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Excel Core Formulas Day 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+  :root{
+    --ground:#F2F6FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7FAFD;
+    --ink:#222E3B;
+    --ink-2:#5D6F80;
+    --line:#DCE5EE;
+    --line-soft:#EAF0F6;
+
+    --p1:#C6EBD9; --p2:#FFD6DE; --p3:#DED5F7; --p4:#FFECAE; --p5:#CBE5F8;
+    --badge-ink:#2A3744;
+
+    --accent:#5B54C9;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E7E4FB;
+
+    --ok-bg:#D8F1E4; --ok-line:#3F9E74; --ok-ink:#1D6A4B;
+    --no-bg:#FBDCE1; --no-line:#D4646C; --no-ink:#93313A;
+
+    --shadow:0 1px 2px rgba(34,46,59,.05), 0 8px 24px -12px rgba(34,46,59,.18);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#141A21;
+      --surface:#1D242D;
+      --surface-2:#232B35;
+      --ink:#E7EDF3;
+      --ink-2:#9BAAB9;
+      --line:#333D49;
+      --line-soft:#2A323C;
+
+      --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+      --badge-ink:#EAF1F6;
+
+      --accent:#A79BF5;
+      --accent-ink:#1B1630;
+      --accent-soft:#2C2A48;
+
+      --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+      --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141A21;
+    --surface:#1D242D;
+    --surface-2:#232B35;
+    --ink:#E7EDF3;
+    --ink-2:#9BAAB9;
+    --line:#333D49;
+    --line-soft:#2A323C;
+
+    --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+    --badge-ink:#EAF1F6;
+
+    --accent:#A79BF5;
+    --accent-ink:#1B1630;
+    --accent-soft:#2C2A48;
+
+    --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+    --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:880px;
+    margin:0 auto;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .brand h1{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:-.01em;
+    line-height:1.2;
+    text-wrap:balance;
+  }
+  .brand .eyebrow{
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-2);
+    font-weight:700;
+  }
+  .meters{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 12px;
+    border-radius:999px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-weight:600;
+    font-size:13.5px;
+    font-variant-numeric:tabular-nums;
+    color:var(--badge-ink);
+    white-space:nowrap;
+  }
+  .pill--time{background:var(--p5)}
+  .pill--count{background:var(--p3)}
+  .pill--right{background:var(--p1)}
+  .pill--wrong{background:var(--p2)}
+  .pill svg{width:14px;height:14px;flex:none;opacity:.75}
+  .pill .sep{opacity:.5;font-weight:500}
+  .pill .tick{font-weight:700;opacity:.8}
+
+  .rail{height:4px;background:var(--line-soft);display:flex}
+  .rail-ok{height:100%;width:0%;background:var(--ok-line);transition:width .35s cubic-bezier(.4,0,.2,1)}
+  .rail-no{height:100%;width:0%;background:var(--no-line);transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+  /* ---------- layout ---------- */
+  main{
+    max-width:880px;
+    margin:0 auto;
+    padding-inline:16px;
+    padding-block:24px 56px;
+  }
+
+  /* ---------- question card ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  @media (max-width:480px){ .card{padding:18px 16px} }
+
+  .qhead{display:flex;align-items:flex-start;gap:12px}
+  .qnum{
+    flex:none;
+    display:grid;
+    place-items:center;
+    min-width:44px;
+    height:34px;
+    padding-inline:10px;
+    border-radius:10px;
+    background:var(--badge-bg,var(--p1));
+    color:var(--badge-ink);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:13px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .qtext{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:500;
+    font-size:21px;
+    line-height:1.35;
+    letter-spacing:-.005em;
+    text-wrap:balance;
+  }
+  @media (max-width:480px){ .qtext{font-size:19px} }
+  .qtext code, .opt code, .explain code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.88em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:1px 5px;
+    white-space:nowrap;
+  }
+
+  .options{display:flex;flex-direction:column;gap:9px}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    font:inherit;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1.5px solid var(--line);
+    border-radius:11px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s, transform .08s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface)}
+  .opt:active:not(:disabled){transform:translateY(1px)}
+  .opt:disabled{cursor:default}
+  .opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .opt .key{
+    flex:none;
+    width:25px;height:25px;
+    display:grid;place-items:center;
+    border-radius:7px;
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;
+    margin-top:1px;
+  }
+  .opt .label{flex:1;min-width:0}
+  .opt .mark{flex:none;font-size:15px;font-weight:700;margin-top:1px;opacity:0}
+
+  .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .opt[aria-pressed="true"] .key{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+
+  .opt.is-correct{border-color:var(--ok-line);background:var(--ok-bg)}
+  .opt.is-correct .key{border-color:var(--ok-line);background:var(--ok-line);color:var(--surface)}
+  .opt.is-correct .mark{opacity:1;color:var(--ok-ink)}
+  .opt.is-wrong{border-color:var(--no-line);background:var(--no-bg)}
+  .opt.is-wrong .key{border-color:var(--no-line);background:var(--no-line);color:var(--surface)}
+  .opt.is-wrong .mark{opacity:1;color:var(--no-ink)}
+  .opt.is-dim{opacity:.55}
+
+  /* ---------- explanation ---------- */
+  .explain{
+    border-radius:11px;
+    padding:14px 16px;
+    border-left:4px solid var(--verdict-line,var(--ok-line));
+    background:var(--verdict-bg,var(--ok-bg));
+    color:var(--verdict-ink,var(--ok-ink));
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .explain .verdict{
+    font-size:11px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .explain p{margin:0;color:var(--ink);font-size:15px;line-height:1.55}
+
+  /* ---------- nav ---------- */
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn{
+    font:inherit;
+    font-weight:700;
+    border-radius:10px;
+    padding:11px 20px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:filter .15s, background .15s, opacity .15s;
+  }
+  .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .btn--primary{background:var(--accent);color:var(--accent-ink)}
+  .btn--primary:hover:not(:disabled){filter:brightness(1.08)}
+  .btn--ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+  .btn--ghost:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .hint{
+    margin-top:14px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-2);
+  }
+  .hint kbd{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:1px 5px;
+  }
+
+  /* ---------- results ---------- */
+  .result{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px 24px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .result h2{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-.01em;
+  }
+  .score-ring{
+    margin:6px 0 2px;
+    width:132px;height:132px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--line-soft) 0);
+  }
+  .score-ring .inner{
+    width:108px;height:108px;
+    border-radius:50%;
+    background:var(--surface);
+    display:grid;place-items:center;
+    line-height:1;
+  }
+  .score-ring .num{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:30px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .result .sub{margin:0;color:var(--ink-2);font-size:15px}
+  .stats{
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    margin-top:12px;
+  }
+  .stat{
+    background:var(--stat-bg,var(--p1));
+    color:var(--badge-ink);
+    border-radius:10px;
+    padding:9px 15px;
+    text-align:left;
+  }
+  .stat b{
+    display:block;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:17px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;opacity:.75}
+
+  .review{margin-top:22px;display:flex;flex-direction:column;gap:9px}
+  .review h3{
+    margin:0 0 2px;
+    font-family:"Fraunces",Georgia,serif;
+    font-size:17px;font-weight:700;
+  }
+  .review-row{
+    display:flex;gap:11px;align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--no-line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14.5px;
+  }
+  .review-row .n{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;color:var(--ink-2);
+    flex:none;margin-top:2px;
+  }
+  .review-row .body{min-width:0}
+  .review-row .q{font-weight:700;display:block;margin-bottom:3px}
+  .review-row .a{color:var(--ink-2);display:block;font-size:13.5px}
+  .review-row .a b{color:var(--ok-ink);font-weight:700}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="eyebrow">Operations Analyst · Week 1</span>
+      <h1>Day 2 — Core Formulas</h1>
+    </div>
+    <div class="meters">
+      <span class="pill pill--time" aria-label="Elapsed time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+        <span id="time-text">00:00</span>
+      </span>
+      <span class="pill pill--right" aria-label="Correct so far"><span class="tick">✓</span><span id="n-right">0</span></span>
+      <span class="pill pill--wrong" aria-label="Incorrect so far"><span class="tick">✕</span><span id="n-wrong">0</span></span>
+      <span class="pill pill--count" aria-label="Question progress">
+        <span id="q-current">1</span><span class="sep">/</span><span id="q-total">25</span>
+      </span>
+    </div>
+  </div>
+  <div class="rail"><div class="rail-ok" id="rail-ok"></div><div class="rail-no" id="rail-no"></div></div>
+</header>
+
+<main>
+  <section id="quiz-view">
+    <div class="card">
+      <div class="qhead">
+        <span class="qnum" id="qnum">Q01</span>
+        <h2 class="qtext" id="qtext">Loading…</h2>
+      </div>
+      <div class="options" id="options" role="group" aria-label="Answer choices"></div>
+      <div class="explain" id="explain" hidden>
+        <span class="verdict" id="verdict"></span>
+        <p id="explain-text"></p>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn--ghost" id="prev-btn" type="button">← Previous</button>
+      <button class="btn btn--primary" id="action-btn" type="button">Check Answer</button>
+    </div>
+    <p class="hint">Press <kbd>A</kbd>–<kbd>D</kbd> to choose · <kbd>Enter</kbd> to check and continue</p>
+  </section>
+
+  <section id="result-view" hidden></section>
+</main>
+
+<script>
+const QUESTIONS = [
+  {q:"What is the primary purpose of the SUM function in Excel?",
+   o:["Count text values","Add numbers together","Find the largest value","Find the average"],a:1,
+   e:"SUM adds the numbers in a range. MAX finds the largest value, AVERAGE the mean, and COUNT/COUNTA do the counting."},
+  {q:"Which formula correctly calculates the total of cells B2 through B10?",
+   o:["=TOTAL(B2:B10)","=ADD(B2:B10)","=SUM(B2:B10)","=COUNT(B2:B10)"],a:2,
+   e:"=SUM(B2:B10) is the correct syntax. TOTAL and ADD are not Excel functions — they return #NAME? errors."},
+  {q:"An analyst has transaction amounts in cells F2:F31. Which formula calculates the total transaction amount?",
+   o:["=COUNT(F2:F31)","=SUM(F2:F31)","=COUNTA(F2:F31)","=AVERAGE(F2:F31)"],a:1,
+   e:"SUM totals the amounts. COUNT would tell you how many transactions there are, not how much they add up to."},
+  {q:"What does the COUNT function count?",
+   o:["All non-empty cells","Only text values","Cells containing numbers","Blank cells"],a:2,
+   e:"COUNT only counts numeric cells. Text, blanks and error values are ignored — which is why it often returns a lower number than you expect."},
+  {q:"What does the COUNTA function count?",
+   o:["Only numbers","Only formulas","Non-empty cells","Only blank cells"],a:2,
+   e:"COUNTA counts every cell that contains anything — numbers, text, dates, even a formula returning \"\". Use COUNTBLANK for the empty ones."},
+  {q:"What is the main purpose of the AVERAGE function?",
+   o:["Find the total","Find the arithmetic mean","Count records","Find duplicate values"],a:1,
+   e:"AVERAGE divides the sum by the count of numeric cells. Blanks are skipped, but zeros are included — worth knowing when a blank and a 0 mean different things."},
+  {q:"If the transaction amounts are 100, 200, and 300, what will =AVERAGE(A1:A3) return?",
+   o:["100","200","300","600"],a:1,
+   e:"(100 + 200 + 300) ÷ 3 = 200. The 600 option is the SUM, not the average."},
+  {q:"A column contains 30 transaction amounts, but 3 cells are blank. What will =COUNT(A2:A31) return, assuming the other 27 cells contain numbers?",
+   o:["30","27","3","0"],a:1,
+   e:"COUNT returns 27 — only the cells holding numbers. The gap between 30 rows and a count of 27 is exactly how you spot missing amounts."},
+  {q:"A column contains 30 customer IDs, with 28 populated cells and 2 blanks. Which function can be used to check how many customer IDs are populated?",
+   o:["SUM","COUNT","COUNTA","AVERAGE"],a:2,
+   e:"COUNTA returns 28. COUNT would return 0 if the IDs are text codes like CUST-014, since those are not numbers."},
+  {q:"What is the general formula for percentage variance between an old value and a new value?",
+   o:["(New − Old) / Old × 100","(Old − New) / New × 100","New + Old × 100","New / Old + 100"],a:0,
+   e:"Variance is measured against the baseline, so the old value is always the denominator. A positive result is an increase, a negative result a decrease."},
+  {q:"If planned transactions are 1,000 and actual transactions are 1,200, what is the percentage variance?",
+   o:["10%","15%","20%","25%"],a:2,
+   e:"(1,200 − 1,000) ÷ 1,000 × 100 = 20%. Actuals came in 20% above plan."},
+  {q:"If the previous month's revenue was ₹50,000 and the current month's revenue is ₹55,000, what is the percentage increase?",
+   o:["5%","10%","15%","20%"],a:1,
+   e:"(55,000 − 50,000) ÷ 50,000 × 100 = 10%. The ₹5,000 rise is 5% only if you mistakenly divide by 100,000."},
+  {q:"Which formula calculates percentage variance when the original value is in B2 and the new value is in C2?",
+   o:["=(B2-C2)/C2*100","=(C2-B2)/B2*100","=(C2+B2)/B2*100","=C2-B2*100"],a:1,
+   e:"New minus old, divided by old: =(C2-B2)/B2*100. Option D also fails on order of operations — it multiplies B2 by 100 first."},
+  {q:"An engagement has revenue of ₹100,000 and costs of ₹70,000. What is the margin percentage?",
+   o:["20%","30%","70%","170%"],a:1,
+   e:"Margin = (100,000 − 70,000) ÷ 100,000 × 100 = 30%. The 70% figure is the cost ratio, not the margin."},
+  {q:"Which formula correctly calculates margin percentage when revenue is in B2 and cost is in C2?",
+   o:["=C2/B2*100","=(B2-C2)/B2*100","=(B2+C2)/B2*100","=B2/C2*100"],a:1,
+   e:"Margin always divides profit by revenue: =(B2-C2)/B2*100. Dividing cost by revenue gives the cost ratio instead."},
+  {q:"What does a relative cell reference do when a formula is copied to another cell?",
+   o:["It always remains unchanged","It automatically adjusts based on its new location","It converts to text","It becomes an error"],a:1,
+   e:"A relative reference like B2 shifts with the formula — copy it one row down and it becomes B3. That is what makes a single formula fill a whole column."},
+  {q:"What is the purpose of the $ symbol in an Excel reference?",
+   o:["To indicate currency only","To make a row or column reference absolute","To indicate a text value","To create a percentage"],a:1,
+   e:"$ locks the part it sits in front of. $B locks the column, B$2 locks the row, $B$2 locks both. F4 cycles through the combinations."},
+  {q:"In the formula =B2*$F$1, what happens to $F$1 when the formula is copied down?",
+   o:["It changes to F2, F3, etc.","Only the row changes","Only the column changes","It remains $F$1"],a:3,
+   e:"Both parts are locked, so every copied formula keeps pointing at F1 — the standard way to apply one tax or FX rate across a whole column."},
+  {q:"Which of the following is an absolute cell reference?",
+   o:["A1","$A$1","A$1","$A1"],a:1,
+   e:"$A$1 is fully absolute. A$1 and $A1 are mixed references — one part locked, the other still free to shift."},
+  {q:"What does the #N/A error commonly indicate?",
+   o:["A value or lookup result is not available","A number is too large","The workbook is closed","The cell is formatted as currency"],a:0,
+   e:"#N/A means \"not available\" — a lookup ran but found no match. Wrap it in IFNA or IFERROR once you have confirmed the misses are expected."},
+  {q:"What does the #VALUE! error generally indicate?",
+   o:["Excel cannot find a requested sheet","An incorrect type of value or argument is being used in a calculation","A cell is empty","The formula was successfully calculated"],a:1,
+   e:"#VALUE! is a data-type mismatch — usually arithmetic on a cell holding text, such as an amount imported as \"1,200 \" with a stray space."},
+  {q:"An analyst uses a lookup formula to find a Customer ID, but no matching ID exists. Which error might Excel return?",
+   o:["#N/A","#VALUE!","#DIV/0!","#NAME?"],a:0,
+   e:"#N/A — the lookup worked but found nothing. #DIV/0! is division by zero and #NAME? means a misspelled function or undefined name."},
+  {q:"Which is a useful basic validation check for a transaction amount column?",
+   o:["Check for negative or unexpected amounts","Change all amounts to text","Merge all amount cells","Delete all zero values without checking"],a:0,
+   e:"Scanning for negatives, zeros and outliers catches reversals, refunds and data-entry slips early. Converting amounts to text would break every formula downstream."},
+  {q:"An Operations Analyst wants to check whether every transaction has a Transaction ID. Which approach is most appropriate?",
+   o:["Check for blank Transaction ID cells","Apply currency formatting","Calculate the average Transaction ID","Sort only the amount column"],a:0,
+   e:"Compare COUNTA of the ID column against the row count, or use COUNTBLANK. An average of an ID is meaningless — IDs are labels, not quantities."},
+  {q:"A dataset contains 100 transaction records. COUNTA(Transaction_ID) returns 95. What does this indicate?",
+   o:["There are 95 duplicate transactions","95 Transaction ID cells are populated, so 5 are blank","All 100 transactions are invalid","The dataset contains 95 numerical values"],a:1,
+   e:"COUNTA counts filled cells, so 100 − 95 = 5 records are missing an ID. Duplicates are a separate check — COUNTIF or Remove Duplicates."}
+];
+
+const PASTELS = ["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)"];
+const LETTERS = ["A","B","C","D","E","F"];
+const PRAISE = ["Exactly right.","Nailed it.","Correct.","That's the one.","Spot on."];
+const NUDGE  = ["Not quite.","Close, but no.","Not this time.","Missed that one.","Worth a second look."];
+
+let idx = 0;
+let picked = new Array(QUESTIONS.length).fill(null);
+let locked = new Array(QUESTIONS.length).fill(false);
+let seconds = 0;
+let ticking = true;
+
+const $ = id => document.getElementById(id);
+
+function fmt(s){
+  return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+}
+setInterval(() => {
+  if(!ticking) return;
+  seconds++;
+  $("time-text").textContent = fmt(seconds);
+}, 1000);
+
+function tally(){
+  let right = 0, wrong = 0;
+  QUESTIONS.forEach((q,i) => {
+    if(!locked[i]) return;
+    if(picked[i] === q.a) right++; else wrong++;
+  });
+  return {right, wrong, done: right + wrong};
+}
+
+function updateMeters(){
+  const t = tally();
+  $("n-right").textContent = t.right;
+  $("n-wrong").textContent = t.wrong;
+  $("q-current").textContent = idx + 1;
+  $("q-total").textContent = QUESTIONS.length;
+  $("rail-ok").style.width = (t.right / QUESTIONS.length * 100) + "%";
+  $("rail-no").style.width = (t.wrong / QUESTIONS.length * 100) + "%";
+}
+
+function render(){
+  const item = QUESTIONS[idx];
+  const isLocked = locked[idx];
+
+  const badge = $("qnum");
+  badge.textContent = "Q" + String(idx + 1).padStart(2,"0");
+  badge.style.setProperty("--badge-bg", PASTELS[idx % PASTELS.length]);
+
+  $("qtext").textContent = item.q;
+
+  const box = $("options");
+  box.textContent = "";
+  item.o.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.id = "q" + idx + "-opt" + i;
+    b.setAttribute("aria-pressed", String(picked[idx] === i));
+    b.disabled = isLocked;
+
+    const key = document.createElement("span");
+    key.className = "key";
+    key.textContent = LETTERS[i];
+
+    const label = document.createElement("span");
+    label.className = "label";
+    if(text.charAt(0) === "="){
+      const c = document.createElement("code");
+      c.textContent = text;
+      label.append(c);
+    } else {
+      label.textContent = text;
+    }
+
+    const mark = document.createElement("span");
+    mark.className = "mark";
+
+    if(isLocked){
+      if(i === item.a){ b.classList.add("is-correct"); mark.textContent = "✓"; }
+      else if(i === picked[idx]){ b.classList.add("is-wrong"); mark.textContent = "✕"; }
+      else { b.classList.add("is-dim"); }
+    }
+
+    b.append(key, label, mark);
+    b.addEventListener("click", () => choose(i));
+    box.append(b);
+  });
+
+  const panel = $("explain");
+  if(isLocked){
+    const right = picked[idx] === item.a;
+    panel.hidden = false;
+    panel.style.setProperty("--verdict-bg", right ? "var(--ok-bg)" : "var(--no-bg)");
+    panel.style.setProperty("--verdict-line", right ? "var(--ok-line)" : "var(--no-line)");
+    panel.style.setProperty("--verdict-ink", right ? "var(--ok-ink)" : "var(--no-ink)");
+    $("verdict").textContent = right ? PRAISE[idx % PRAISE.length] : NUDGE[idx % NUDGE.length];
+    $("explain-text").textContent = (right ? "" : "Correct answer: " + LETTERS[item.a] + " — " + item.o[item.a] + ". ") + item.e;
+  } else {
+    panel.hidden = true;
+  }
+
+  $("prev-btn").disabled = idx === 0;
+  const action = $("action-btn");
+  if(!isLocked){
+    action.textContent = "Check Answer";
+    action.disabled = picked[idx] === null;
+  } else {
+    action.textContent = idx === QUESTIONS.length - 1 ? "See Results" : "Next Question →";
+    action.disabled = false;
+  }
+
+  updateMeters();
+}
+
+function choose(i){
+  if(locked[idx]) return;
+  picked[idx] = i;
+  render();
+}
+
+function act(){
+  if(!locked[idx]){
+    if(picked[idx] === null) return;
+    locked[idx] = true;
+    render();
+  } else if(idx < QUESTIONS.length - 1){
+    idx++;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  } else {
+    finish();
+  }
+}
+
+function finish(){
+  ticking = false;
+  const t = tally();
+  const pct = Math.round(t.right / QUESTIONS.length * 100);
+  const missed = QUESTIONS.map((q,i) => ({q,i})).filter(({q,i}) => picked[i] !== q.a);
+
+  $("quiz-view").hidden = true;
+
+  const verdict =
+    pct === 100 ? "Perfect run — the core formulas are second nature." :
+    pct >= 80 ? "Strong command of the formula set." :
+    pct >= 60 ? "Solid base — the topics below need another pass." :
+    "Worth reworking Day 2 before moving on.";
+
+  const view = $("result-view");
+  view.hidden = false;
+  view.innerHTML =
+    '<div class="result">' +
+      '<h2>Quiz complete</h2>' +
+      '<div class="score-ring" style="--pct:' + pct + '"><div class="inner"><span class="num">' + pct + '%</span></div></div>' +
+      '<p class="sub">' + verdict + '</p>' +
+      '<div class="stats">' +
+        '<div class="stat" style="--stat-bg:var(--p1)"><b>' + t.right + '</b><span>Correct</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p2)"><b>' + t.wrong + '</b><span>Incorrect</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p5)"><b>' + fmt(seconds) + '</b><span>Time taken</span></div>' +
+      '</div>' +
+      '<div class="nav" style="justify-content:center">' +
+        '<button class="btn btn--ghost" id="review-btn" type="button">Review answers</button>' +
+        '<button class="btn btn--primary" id="restart-btn" type="button">Restart quiz</button>' +
+      '</div>' +
+    '</div>' +
+    (missed.length ? '<div class="review"><h3>Questions to revisit (' + missed.length + ')</h3>' +
+      missed.map(({q,i}) =>
+        '<div class="review-row"><span class="n">Q' + String(i+1).padStart(2,"0") + '</span><div class="body">' +
+        '<span class="q"></span><span class="a">Correct answer: <b></b></span></div></div>'
+      ).join("") + '</div>' : "");
+
+  const rows = view.querySelectorAll(".review-row");
+  missed.forEach(({q,i}, n) => {
+    rows[n].querySelector(".q").textContent = q.q;
+    rows[n].querySelector(".a b").textContent = LETTERS[q.a] + " — " + q.o[q.a];
+  });
+
+  $("restart-btn").addEventListener("click", restart);
+  $("review-btn").addEventListener("click", () => {
+    idx = 0;
+    $("result-view").hidden = true;
+    $("quiz-view").hidden = false;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function restart(){
+  idx = 0;
+  picked = new Array(QUESTIONS.length).fill(null);
+  locked = new Array(QUESTIONS.length).fill(false);
+  seconds = 0;
+  ticking = true;
+  $("time-text").textContent = "00:00";
+  $("result-view").hidden = true;
+  $("quiz-view").hidden = false;
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+$("action-btn").addEventListener("click", act);
+$("prev-btn").addEventListener("click", () => {
+  if(idx > 0){ idx--; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+});
+
+document.addEventListener("keydown", e => {
+  if($("quiz-view").hidden) return;
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = LETTERS.indexOf(e.key.toUpperCase());
+  if(n > -1 && n < QUESTIONS[idx].o.length){ e.preventDefault(); choose(n); return; }
+  if(e.key === "Enter"){ e.preventDefault(); act(); return; }
+  if(e.key === "ArrowLeft" && idx > 0){ idx--; render(); }
+});
+
+render();
+</script>
+</body>
+</html>
