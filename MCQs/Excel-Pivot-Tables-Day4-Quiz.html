@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Excel PivotTables Day 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+  :root{
+    --ground:#F2F6FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7FAFD;
+    --ink:#222E3B;
+    --ink-2:#5D6F80;
+    --line:#DCE5EE;
+    --line-soft:#EAF0F6;
+
+    --p1:#C6EBD9; --p2:#FFD6DE; --p3:#DED5F7; --p4:#FFECAE; --p5:#CBE5F8;
+    --badge-ink:#2A3744;
+
+    --accent:#5B54C9;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E7E4FB;
+
+    --ok-bg:#D8F1E4; --ok-line:#3F9E74; --ok-ink:#1D6A4B;
+    --no-bg:#FBDCE1; --no-line:#D4646C; --no-ink:#93313A;
+
+    --shadow:0 1px 2px rgba(34,46,59,.05), 0 8px 24px -12px rgba(34,46,59,.18);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#141A21;
+      --surface:#1D242D;
+      --surface-2:#232B35;
+      --ink:#E7EDF3;
+      --ink-2:#9BAAB9;
+      --line:#333D49;
+      --line-soft:#2A323C;
+
+      --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+      --badge-ink:#EAF1F6;
+
+      --accent:#A79BF5;
+      --accent-ink:#1B1630;
+      --accent-soft:#2C2A48;
+
+      --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+      --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141A21;
+    --surface:#1D242D;
+    --surface-2:#232B35;
+    --ink:#E7EDF3;
+    --ink-2:#9BAAB9;
+    --line:#333D49;
+    --line-soft:#2A323C;
+
+    --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+    --badge-ink:#EAF1F6;
+
+    --accent:#A79BF5;
+    --accent-ink:#1B1630;
+    --accent-soft:#2C2A48;
+
+    --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+    --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:880px;
+    margin:0 auto;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .brand h1{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:-.01em;
+    line-height:1.2;
+    text-wrap:balance;
+  }
+  .brand .eyebrow{
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-2);
+    font-weight:700;
+  }
+  .meters{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 12px;
+    border-radius:999px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-weight:600;
+    font-size:13.5px;
+    font-variant-numeric:tabular-nums;
+    color:var(--badge-ink);
+    white-space:nowrap;
+  }
+  .pill--time{background:var(--p5)}
+  .pill--count{background:var(--p3)}
+  .pill--right{background:var(--p1)}
+  .pill--wrong{background:var(--p2)}
+  .pill svg{width:14px;height:14px;flex:none;opacity:.75}
+  .pill .sep{opacity:.5;font-weight:500}
+  .pill .tick{font-weight:700;opacity:.8}
+
+  .rail{height:4px;background:var(--line-soft);display:flex}
+  .rail-ok{height:100%;width:0%;background:var(--ok-line);transition:width .35s cubic-bezier(.4,0,.2,1)}
+  .rail-no{height:100%;width:0%;background:var(--no-line);transition:width .35s cubic-bezier(.4,0,.2,1)}
+
+  /* ---------- layout ---------- */
+  main{
+    max-width:880px;
+    margin:0 auto;
+    padding-inline:16px;
+    padding-block:24px 56px;
+  }
+
+  /* ---------- question card ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  @media (max-width:480px){ .card{padding:18px 16px} }
+
+  .qhead{display:flex;align-items:flex-start;gap:12px}
+  .qnum{
+    flex:none;
+    display:grid;
+    place-items:center;
+    min-width:44px;
+    height:34px;
+    padding-inline:10px;
+    border-radius:10px;
+    background:var(--badge-bg,var(--p1));
+    color:var(--badge-ink);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:13px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .qtext{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:500;
+    font-size:21px;
+    line-height:1.35;
+    letter-spacing:-.005em;
+    text-wrap:balance;
+  }
+  @media (max-width:480px){ .qtext{font-size:19px} }
+  .qtext code, .opt code, .explain code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.88em;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:1px 5px;
+    white-space:nowrap;
+  }
+
+  .options{display:flex;flex-direction:column;gap:9px}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    font:inherit;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1.5px solid var(--line);
+    border-radius:11px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s, transform .08s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface)}
+  .opt:active:not(:disabled){transform:translateY(1px)}
+  .opt:disabled{cursor:default}
+  .opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .opt .key{
+    flex:none;
+    width:25px;height:25px;
+    display:grid;place-items:center;
+    border-radius:7px;
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;
+    margin-top:1px;
+  }
+  .opt .label{flex:1;min-width:0}
+  .opt .mark{flex:none;font-size:15px;font-weight:700;margin-top:1px;opacity:0}
+
+  .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .opt[aria-pressed="true"] .key{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+
+  .opt.is-correct{border-color:var(--ok-line);background:var(--ok-bg)}
+  .opt.is-correct .key{border-color:var(--ok-line);background:var(--ok-line);color:var(--surface)}
+  .opt.is-correct .mark{opacity:1;color:var(--ok-ink)}
+  .opt.is-wrong{border-color:var(--no-line);background:var(--no-bg)}
+  .opt.is-wrong .key{border-color:var(--no-line);background:var(--no-line);color:var(--surface)}
+  .opt.is-wrong .mark{opacity:1;color:var(--no-ink)}
+  .opt.is-dim{opacity:.55}
+
+  /* ---------- explanation ---------- */
+  .explain{
+    border-radius:11px;
+    padding:14px 16px;
+    border-left:4px solid var(--verdict-line,var(--ok-line));
+    background:var(--verdict-bg,var(--ok-bg));
+    color:var(--verdict-ink,var(--ok-ink));
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .explain .verdict{
+    font-size:11px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .explain p{margin:0;color:var(--ink);font-size:15px;line-height:1.55}
+
+  /* ---------- nav ---------- */
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn{
+    font:inherit;
+    font-weight:700;
+    border-radius:10px;
+    padding:11px 20px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:filter .15s, background .15s, opacity .15s;
+  }
+  .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .btn--primary{background:var(--accent);color:var(--accent-ink)}
+  .btn--primary:hover:not(:disabled){filter:brightness(1.08)}
+  .btn--ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+  .btn--ghost:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .hint{
+    margin-top:14px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-2);
+  }
+  .hint kbd{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:1px 5px;
+  }
+
+  /* ---------- results ---------- */
+  .result{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px 24px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .result h2{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-.01em;
+  }
+  .score-ring{
+    margin:6px 0 2px;
+    width:132px;height:132px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--line-soft) 0);
+  }
+  .score-ring .inner{
+    width:108px;height:108px;
+    border-radius:50%;
+    background:var(--surface);
+    display:grid;place-items:center;
+    line-height:1;
+  }
+  .score-ring .num{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:30px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .result .sub{margin:0;color:var(--ink-2);font-size:15px}
+  .stats{
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    margin-top:12px;
+  }
+  .stat{
+    background:var(--stat-bg,var(--p1));
+    color:var(--badge-ink);
+    border-radius:10px;
+    padding:9px 15px;
+    text-align:left;
+  }
+  .stat b{
+    display:block;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:17px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;opacity:.75}
+
+  .review{margin-top:22px;display:flex;flex-direction:column;gap:9px}
+  .review h3{
+    margin:0 0 2px;
+    font-family:"Fraunces",Georgia,serif;
+    font-size:17px;font-weight:700;
+  }
+  .review-row{
+    display:flex;gap:11px;align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--no-line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14.5px;
+  }
+  .review-row .n{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;color:var(--ink-2);
+    flex:none;margin-top:2px;
+  }
+  .review-row .body{min-width:0}
+  .review-row .q{font-weight:700;display:block;margin-bottom:3px}
+  .review-row .a{color:var(--ink-2);display:block;font-size:13.5px}
+  .review-row .a b{color:var(--ok-ink);font-weight:700}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="eyebrow">Operations Analyst · Week 1</span>
+      <h1>Day 4 — Pivot Tables</h1>
+    </div>
+    <div class="meters">
+      <span class="pill pill--time" aria-label="Elapsed time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+        <span id="time-text">00:00</span>
+      </span>
+      <span class="pill pill--right" aria-label="Correct so far"><span class="tick">✓</span><span id="n-right">0</span></span>
+      <span class="pill pill--wrong" aria-label="Incorrect so far"><span class="tick">✕</span><span id="n-wrong">0</span></span>
+      <span class="pill pill--count" aria-label="Question progress">
+        <span id="q-current">1</span><span class="sep">/</span><span id="q-total">25</span>
+      </span>
+    </div>
+  </div>
+  <div class="rail"><div class="rail-ok" id="rail-ok"></div><div class="rail-no" id="rail-no"></div></div>
+</header>
+
+<main>
+  <section id="quiz-view">
+    <div class="card">
+      <div class="qhead">
+        <span class="qnum" id="qnum">Q01</span>
+        <h2 class="qtext" id="qtext">Loading…</h2>
+      </div>
+      <div class="options" id="options" role="group" aria-label="Answer choices"></div>
+      <div class="explain" id="explain" hidden>
+        <span class="verdict" id="verdict"></span>
+        <p id="explain-text"></p>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn--ghost" id="prev-btn" type="button">← Previous</button>
+      <button class="btn btn--primary" id="action-btn" type="button">Check Answer</button>
+    </div>
+    <p class="hint">Press <kbd>A</kbd>–<kbd>D</kbd> to choose · <kbd>Enter</kbd> to check and continue</p>
+  </section>
+
+  <section id="result-view" hidden></section>
+</main>
+
+<script>
+const QUESTIONS = [
+  {q:"What is the primary purpose of a PivotTable?",
+   o:["To write VBA programs","To summarize and analyze large datasets","To remove all duplicate records","To format individual cells"],a:1,
+   e:"A PivotTable turns thousands of transaction rows into a summary you can actually read — totals, counts and averages grouped by whatever dimension you drag in."},
+  {q:"Before creating a PivotTable, what is generally important about the source data?",
+   o:["It should have clear column headers","All cells should be merged","It should contain only one row","Every column should have the same value"],a:0,
+   e:"Headers become the field names in the PivotTable Fields list. Blank or duplicated headers stop the PivotTable from being created at all."},
+  {q:"Which Excel feature is commonly used to create a PivotTable?",
+   o:["Insert → PivotTable","Review → Spelling","Page Layout → Themes","View → Zoom"],a:0,
+   e:"Insert → PivotTable. Select a cell inside the data first and Excel proposes the full range — or better, convert the range to a Table so it grows automatically."},
+  {q:"In a transaction dataset, each row typically represents:",
+   o:["A worksheet","A transaction or record","A column heading","A PivotChart"],a:1,
+   e:"One row per transaction, one column per field. That tidy shape is exactly what a PivotTable expects as its source."},
+  {q:"An analyst wants to know the total transaction amount for each branch. Which PivotTable arrangement is most appropriate?",
+   o:["Branch in Rows and Amount in Values","Branch in Values and Amount in Rows","Branch in Filters and Amount in Rows only","Amount in Filters only"],a:0,
+   e:"The category you want to break results down by goes in Rows; the number you want totalled goes in Values. Branch in Rows, Amount in Values."},
+  {q:"If the Amount field is placed in the Values area, what does Excel commonly calculate by default for numerical data?",
+   o:["SUM","PROPER","COUNTA","CONCAT"],a:0,
+   e:"Numeric fields default to Sum. If a field defaults to Count instead, that is a warning sign — some of the values are stored as text."},
+  {q:"An analyst wants to know how many transactions occurred at each branch. Which summary function is appropriate?",
+   o:["SUM","COUNT","AVERAGE","MINUS"],a:1,
+   e:"Count answers \"how many\", Sum answers \"how much\". Change it via Value Field Settings — typically counting Transaction ID."},
+  {q:"Which PivotTable area is used to display categories such as Branch, Client, or Transaction Type?",
+   o:["Values","Rows","Formula Bar","Status Bar"],a:1,
+   e:"Rows holds the categories you are grouping by, listed down the left of the PivotTable."},
+  {q:"Which PivotTable area is used to calculate totals, counts, or averages?",
+   o:["Values","Rows","Columns only","Name Box"],a:0,
+   e:"Values is where the maths happens. Each field dropped there gets its own summary function — Sum, Count, Average, Min, Max and so on."},
+  {q:"What is the purpose of the Columns area in a PivotTable?",
+   o:["To arrange categories across columns for comparison","To delete columns from the source data","To change the worksheet name","To create formulas outside the PivotTable"],a:0,
+   e:"Columns spreads a second category across the top, giving a cross-tab — branches down the side, months across the top, amounts in the middle."},
+  {q:"An analyst wants to summarize transaction amounts by month. What PivotTable capability can help organize dates into months?",
+   o:["Grouping","Remove Duplicates","Text to Columns","Freeze Panes"],a:0,
+   e:"Right-click a date in the PivotTable and choose Group to roll daily dates up into months, quarters or years. It only works if the dates are real date values."},
+  {q:"What is the main benefit of grouping data in a PivotTable?",
+   o:["It allows related values to be summarized into meaningful categories","It permanently deletes records","It changes all numbers into text","It prevents filtering"],a:0,
+   e:"Grouping collapses detail into categories a reader can use — 365 daily rows become 12 monthly ones, without touching the source data."},
+  {q:"A PivotTable contains transaction dates. Which grouping could be useful for management reporting?",
+   o:["Months or quarters","Font size","Cell color only","Worksheet names"],a:0,
+   e:"Months and quarters match how the business reports. Daily detail is for investigation; period totals are for the management pack."},
+  {q:"What is the purpose of a PivotTable filter?",
+   o:["To display only data that meets selected criteria","To permanently delete records","To change formulas in the source dataset","To convert numbers to text"],a:0,
+   e:"Filters narrow what the summary covers. The excluded rows stay in the source data and come straight back when the filter is cleared."},
+  {q:"An analyst wants to view transactions only for BRN-01. Which PivotTable feature can be used?",
+   o:["Filter","Merge Cells","Wrap Text","Format Painter"],a:0,
+   e:"Put Branch in the Filters area, or filter the Row field directly, and select BRN-01. The totals recalculate for that branch only."},
+  {q:"What is a Slicer in Excel?",
+   o:["A visual filtering control for tables or PivotTables","A formula for calculating averages","A tool for removing duplicates","A type of worksheet"],a:0,
+   e:"A Slicer is a panel of clickable buttons that filters a Table or PivotTable — and it shows the current selection on screen, which a dropdown filter does not."},
+  {q:"What is one advantage of using a Slicer instead of opening a traditional filter menu?",
+   o:["It provides an easy visual way to select filter values","It automatically deletes unwanted records","It changes the source data permanently","It converts dates to numbers"],a:0,
+   e:"The active filter is visible at a glance, and one Slicer can drive several PivotTables at once — which matters on a dashboard someone else will read."},
+  {q:"A PivotTable shows transactions by Branch. The analyst wants to quickly select BRN-01, BRN-02, or BRN-03 using buttons. Which feature is appropriate?",
+   o:["Slicer","Text to Columns","Remove Duplicates","Freeze Panes"],a:0,
+   e:"Insert a Slicer on the Branch field. Each branch becomes a button, and Ctrl-click selects more than one."},
+  {q:"What is a PivotChart primarily used for?",
+   o:["Visually presenting summarized PivotTable data","Cleaning duplicate records","Entering raw transaction data","Creating a new database"],a:0,
+   e:"A PivotChart is the visual layer over a PivotTable. Filter either one and both update — they share the same underlying summary."},
+  {q:"An analyst wants to visually compare total transaction amounts across branches. Which PivotChart would be appropriate?",
+   o:["Column or bar chart","Text box","Scatter drawing with no data","WordArt"],a:0,
+   e:"Column or bar is the right form for comparing a measure across categories — length is the easiest visual difference to judge accurately."},
+  {q:"Which is a useful transaction summary for an Operations Analyst?",
+   o:["Total transaction amount by branch","Employee passwords by department","Random cell colors","Number of worksheet tabs"],a:0,
+   e:"Amount by branch is a genuine operational measure — it supports volume monitoring, resourcing and exception review."},
+  {q:"A Finance team wants to compare total transaction amounts by month and branch. Which tool can efficiently provide this summary?",
+   o:["PivotTable","Spell Check","Format Painter","Find and Replace only"],a:0,
+   e:"Branch in Rows, grouped Month in Columns, Amount in Values — a two-dimensional summary built in seconds and refreshable next month."},
+  {q:"In an AML reporting scenario, an analyst wants to identify the number of transactions and total transaction amount by transaction type. Which PivotTable setup would be useful?",
+   o:["Transaction Type in Rows; Amount in Values; Transaction ID in Values as Count","Transaction ID in Rows only","Amount in Filters only","Transaction Type in the Formula Bar"],a:0,
+   e:"Two fields in Values gives both measures side by side — how many and how much per type. Volume and value together are what make a pattern visible."},
+  {q:"An AML analyst wants to summarize transaction activity by customer and identify customers with unusually high transaction volumes. Which PivotTable summary could help?",
+   o:["Customer in Rows and transaction count/amount in Values","Customer in the worksheet title only","Customer in the Page Setup area","Customer name in the formula bar only"],a:0,
+   e:"Customer in Rows with count and amount in Values, then sort descending. The outliers rise to the top for review."},
+  {q:"Which statement best describes a practical Finance/AML reporting use of PivotTables?",
+   o:["They can summarize transaction volumes, amounts, branches, customers, and transaction types for further review","They automatically determine whether a transaction is suspicious","They automatically file a SAR","They replace the need for analyst investigation and supporting evidence"],a:0,
+   e:"A PivotTable surfaces what is worth a closer look. Judging suspicion, documenting the rationale and filing a SAR remain the analyst's work."}
+];
+
+const PASTELS = ["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)"];
+const LETTERS = ["A","B","C","D","E","F"];
+const PRAISE = ["Exactly right.","Nailed it.","Correct.","That's the one.","Spot on."];
+const NUDGE  = ["Not quite.","Close, but no.","Not this time.","Missed that one.","Worth a second look."];
+
+let idx = 0;
+let picked = new Array(QUESTIONS.length).fill(null);
+let locked = new Array(QUESTIONS.length).fill(false);
+let seconds = 0;
+let ticking = true;
+
+const $ = id => document.getElementById(id);
+
+function fmt(s){
+  return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+}
+setInterval(() => {
+  if(!ticking) return;
+  seconds++;
+  $("time-text").textContent = fmt(seconds);
+}, 1000);
+
+function tally(){
+  let right = 0, wrong = 0;
+  QUESTIONS.forEach((q,i) => {
+    if(!locked[i]) return;
+    if(picked[i] === q.a) right++; else wrong++;
+  });
+  return {right, wrong, done: right + wrong};
+}
+
+function updateMeters(){
+  const t = tally();
+  $("n-right").textContent = t.right;
+  $("n-wrong").textContent = t.wrong;
+  $("q-current").textContent = idx + 1;
+  $("q-total").textContent = QUESTIONS.length;
+  $("rail-ok").style.width = (t.right / QUESTIONS.length * 100) + "%";
+  $("rail-no").style.width = (t.wrong / QUESTIONS.length * 100) + "%";
+}
+
+function render(){
+  const item = QUESTIONS[idx];
+  const isLocked = locked[idx];
+
+  const badge = $("qnum");
+  badge.textContent = "Q" + String(idx + 1).padStart(2,"0");
+  badge.style.setProperty("--badge-bg", PASTELS[idx % PASTELS.length]);
+
+  $("qtext").textContent = item.q;
+
+  const box = $("options");
+  box.textContent = "";
+  item.o.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.id = "q" + idx + "-opt" + i;
+    b.setAttribute("aria-pressed", String(picked[idx] === i));
+    b.disabled = isLocked;
+
+    const key = document.createElement("span");
+    key.className = "key";
+    key.textContent = LETTERS[i];
+
+    const label = document.createElement("span");
+    label.className = "label";
+    if(text.charAt(0) === "="){
+      const c = document.createElement("code");
+      c.textContent = text;
+      label.append(c);
+    } else {
+      label.textContent = text;
+    }
+
+    const mark = document.createElement("span");
+    mark.className = "mark";
+
+    if(isLocked){
+      if(i === item.a){ b.classList.add("is-correct"); mark.textContent = "✓"; }
+      else if(i === picked[idx]){ b.classList.add("is-wrong"); mark.textContent = "✕"; }
+      else { b.classList.add("is-dim"); }
+    }
+
+    b.append(key, label, mark);
+    b.addEventListener("click", () => choose(i));
+    box.append(b);
+  });
+
+  const panel = $("explain");
+  if(isLocked){
+    const right = picked[idx] === item.a;
+    panel.hidden = false;
+    panel.style.setProperty("--verdict-bg", right ? "var(--ok-bg)" : "var(--no-bg)");
+    panel.style.setProperty("--verdict-line", right ? "var(--ok-line)" : "var(--no-line)");
+    panel.style.setProperty("--verdict-ink", right ? "var(--ok-ink)" : "var(--no-ink)");
+    $("verdict").textContent = right ? PRAISE[idx % PRAISE.length] : NUDGE[idx % NUDGE.length];
+    $("explain-text").textContent = (right ? "" : "Correct answer: " + LETTERS[item.a] + " — " + item.o[item.a] + ". ") + item.e;
+  } else {
+    panel.hidden = true;
+  }
+
+  $("prev-btn").disabled = idx === 0;
+  const action = $("action-btn");
+  if(!isLocked){
+    action.textContent = "Check Answer";
+    action.disabled = picked[idx] === null;
+  } else {
+    action.textContent = idx === QUESTIONS.length - 1 ? "See Results" : "Next Question →";
+    action.disabled = false;
+  }
+
+  updateMeters();
+}
+
+function choose(i){
+  if(locked[idx]) return;
+  picked[idx] = i;
+  render();
+}
+
+function act(){
+  if(!locked[idx]){
+    if(picked[idx] === null) return;
+    locked[idx] = true;
+    render();
+  } else if(idx < QUESTIONS.length - 1){
+    idx++;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  } else {
+    finish();
+  }
+}
+
+function finish(){
+  ticking = false;
+  const t = tally();
+  const pct = Math.round(t.right / QUESTIONS.length * 100);
+  const missed = QUESTIONS.map((q,i) => ({q,i})).filter(({q,i}) => picked[i] !== q.a);
+
+  $("quiz-view").hidden = true;
+
+  const verdict =
+    pct === 100 ? "Perfect run — PivotTables are second nature." :
+    pct >= 80 ? "Strong command of PivotTable reporting." :
+    pct >= 60 ? "Solid base — the topics below need another pass." :
+    "Worth reworking Day 4 before moving on.";
+
+  const view = $("result-view");
+  view.hidden = false;
+  view.innerHTML =
+    '<div class="result">' +
+      '<h2>Quiz complete</h2>' +
+      '<div class="score-ring" style="--pct:' + pct + '"><div class="inner"><span class="num">' + pct + '%</span></div></div>' +
+      '<p class="sub">' + verdict + '</p>' +
+      '<div class="stats">' +
+        '<div class="stat" style="--stat-bg:var(--p1)"><b>' + t.right + '</b><span>Correct</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p2)"><b>' + t.wrong + '</b><span>Incorrect</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p5)"><b>' + fmt(seconds) + '</b><span>Time taken</span></div>' +
+      '</div>' +
+      '<div class="nav" style="justify-content:center">' +
+        '<button class="btn btn--ghost" id="review-btn" type="button">Review answers</button>' +
+        '<button class="btn btn--primary" id="restart-btn" type="button">Restart quiz</button>' +
+      '</div>' +
+    '</div>' +
+    (missed.length ? '<div class="review"><h3>Questions to revisit (' + missed.length + ')</h3>' +
+      missed.map(({q,i}) =>
+        '<div class="review-row"><span class="n">Q' + String(i+1).padStart(2,"0") + '</span><div class="body">' +
+        '<span class="q"></span><span class="a">Correct answer: <b></b></span></div></div>'
+      ).join("") + '</div>' : "");
+
+  const rows = view.querySelectorAll(".review-row");
+  missed.forEach(({q,i}, n) => {
+    rows[n].querySelector(".q").textContent = q.q;
+    rows[n].querySelector(".a b").textContent = LETTERS[q.a] + " — " + q.o[q.a];
+  });
+
+  $("restart-btn").addEventListener("click", restart);
+  $("review-btn").addEventListener("click", () => {
+    idx = 0;
+    $("result-view").hidden = true;
+    $("quiz-view").hidden = false;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function restart(){
+  idx = 0;
+  picked = new Array(QUESTIONS.length).fill(null);
+  locked = new Array(QUESTIONS.length).fill(false);
+  seconds = 0;
+  ticking = true;
+  $("time-text").textContent = "00:00";
+  $("result-view").hidden = true;
+  $("quiz-view").hidden = false;
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+$("action-btn").addEventListener("click", act);
+$("prev-btn").addEventListener("click", () => {
+  if(idx > 0){ idx--; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+});
+
+document.addEventListener("keydown", e => {
+  if($("quiz-view").hidden) return;
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = LETTERS.indexOf(e.key.toUpperCase());
+  if(n > -1 && n < QUESTIONS[idx].o.length){ e.preventDefault(); choose(n); return; }
+  if(e.key === "Enter"){ e.preventDefault(); act(); return; }
+  if(e.key === "ArrowLeft" && idx > 0){ idx--; render(); }
+});
+
+render();
+</script>
+</body>
+</html>
