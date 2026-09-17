@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light dark}body{margin:0;font-family:system-ui,-apple-system,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Excel Foundations Day 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+
+<style>
+  :root{
+    --ground:#F2F6FA;
+    --surface:#FFFFFF;
+    --surface-2:#F7FAFD;
+    --ink:#222E3B;
+    --ink-2:#5D6F80;
+    --line:#DCE5EE;
+    --line-soft:#EAF0F6;
+
+    --p1:#C6EBD9; --p2:#FFD6DE; --p3:#DED5F7; --p4:#FFECAE; --p5:#CBE5F8;
+    --badge-ink:#2A3744;
+
+    --accent:#5B54C9;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E7E4FB;
+
+    --ok-bg:#D8F1E4; --ok-line:#3F9E74; --ok-ink:#1D6A4B;
+    --no-bg:#FBDCE1; --no-line:#D4646C; --no-ink:#93313A;
+
+    --shadow:0 1px 2px rgba(34,46,59,.05), 0 8px 24px -12px rgba(34,46,59,.18);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#141A21;
+      --surface:#1D242D;
+      --surface-2:#232B35;
+      --ink:#E7EDF3;
+      --ink-2:#9BAAB9;
+      --line:#333D49;
+      --line-soft:#2A323C;
+
+      --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+      --badge-ink:#EAF1F6;
+
+      --accent:#A79BF5;
+      --accent-ink:#1B1630;
+      --accent-soft:#2C2A48;
+
+      --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+      --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141A21;
+    --surface:#1D242D;
+    --surface-2:#232B35;
+    --ink:#E7EDF3;
+    --ink-2:#9BAAB9;
+    --line:#333D49;
+    --line-soft:#2A323C;
+
+    --p1:#1F4438; --p2:#4A2730; --p3:#322A55; --p4:#4A3C16; --p5:#1E3A4F;
+    --badge-ink:#EAF1F6;
+
+    --accent:#A79BF5;
+    --accent-ink:#1B1630;
+    --accent-soft:#2C2A48;
+
+    --ok-bg:#173A2C; --ok-line:#4FBE8E; --ok-ink:#93E5BE;
+    --no-bg:#3E2025; --no-line:#E38189; --no-ink:#F2ADB3;
+
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Karla","Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:820px;
+    margin:0 auto;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .brand h1{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:-.01em;
+    line-height:1.2;
+    text-wrap:balance;
+  }
+  .brand .eyebrow{
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-2);
+    font-weight:700;
+  }
+  .meters{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 12px;
+    border-radius:999px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-weight:600;
+    font-size:13.5px;
+    font-variant-numeric:tabular-nums;
+    color:var(--badge-ink);
+    white-space:nowrap;
+  }
+  .pill--time{background:var(--p5)}
+  .pill--count{background:var(--p3)}
+  .pill svg{width:14px;height:14px;flex:none;opacity:.75}
+  .pill .sep{opacity:.5;font-weight:500}
+
+  .rail{height:4px;background:var(--line-soft)}
+  .rail-fill{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+    transition:width .35s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---------- layout ---------- */
+  main{
+    max-width:820px;
+    margin:0 auto;
+    padding-inline:16px;
+    padding-block:24px 56px;
+  }
+
+  /* ---------- question card ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  @media (max-width:480px){ .card{padding:18px 16px} }
+
+  .qhead{display:flex;align-items:flex-start;gap:12px}
+  .qnum{
+    flex:none;
+    display:grid;
+    place-items:center;
+    min-width:44px;
+    height:34px;
+    padding-inline:10px;
+    border-radius:10px;
+    background:var(--badge-bg,var(--p1));
+    color:var(--badge-ink);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:13px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .qtext{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:500;
+    font-size:21px;
+    line-height:1.35;
+    letter-spacing:-.005em;
+    text-wrap:balance;
+  }
+  @media (max-width:480px){ .qtext{font-size:19px} }
+
+  .options{display:flex;flex-direction:column;gap:9px}
+  .opt{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    width:100%;
+    text-align:left;
+    font:inherit;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1.5px solid var(--line);
+    border-radius:11px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border-color .15s, background .15s, transform .08s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface)}
+  .opt:active:not(:disabled){transform:translateY(1px)}
+  .opt:disabled{cursor:default}
+  .opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .opt .key{
+    flex:none;
+    width:25px;height:25px;
+    display:grid;place-items:center;
+    border-radius:7px;
+    background:var(--surface);
+    border:1.5px solid var(--line);
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;
+    margin-top:1px;
+  }
+  .opt .label{flex:1;min-width:0}
+  .opt .mark{flex:none;font-size:15px;font-weight:700;margin-top:1px;opacity:0}
+
+  .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .opt[aria-pressed="true"] .key{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+
+  .opt.is-correct{border-color:var(--ok-line);background:var(--ok-bg)}
+  .opt.is-correct .key{border-color:var(--ok-line);background:var(--ok-line);color:var(--surface)}
+  .opt.is-correct .mark{opacity:1;color:var(--ok-ink)}
+  .opt.is-wrong{border-color:var(--no-line);background:var(--no-bg)}
+  .opt.is-wrong .key{border-color:var(--no-line);background:var(--no-line);color:var(--surface)}
+  .opt.is-wrong .mark{opacity:1;color:var(--no-ink)}
+  .opt.is-dim{opacity:.55}
+
+  /* ---------- explanation ---------- */
+  .explain{
+    border-radius:11px;
+    padding:14px 16px;
+    border-left:4px solid var(--verdict-line,var(--ok-line));
+    background:var(--verdict-bg,var(--ok-bg));
+    color:var(--verdict-ink,var(--ok-ink));
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .explain .verdict{
+    font-size:11px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .explain p{margin:0;color:var(--ink);font-size:15px;line-height:1.55}
+  .explain .right{font-weight:700;color:var(--verdict-ink,var(--ok-ink))}
+
+  /* ---------- nav ---------- */
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn{
+    font:inherit;
+    font-weight:700;
+    border-radius:10px;
+    padding:11px 20px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:filter .15s, background .15s, opacity .15s;
+  }
+  .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .btn--primary{background:var(--accent);color:var(--accent-ink)}
+  .btn--primary:hover:not(:disabled){filter:brightness(1.08)}
+  .btn--ghost{background:transparent;color:var(--ink-2);border-color:var(--line)}
+  .btn--ghost:hover:not(:disabled){color:var(--ink);border-color:var(--accent)}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .hint{
+    margin-top:14px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-2);
+  }
+  .hint kbd{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:11.5px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:1px 5px;
+  }
+
+  /* ---------- results ---------- */
+  .result{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px 24px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .result h2{
+    margin:0;
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:-.01em;
+  }
+  .score-ring{
+    margin:6px 0 2px;
+    width:132px;height:132px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--line-soft) 0);
+  }
+  .score-ring .inner{
+    width:108px;height:108px;
+    border-radius:50%;
+    background:var(--surface);
+    display:grid;place-items:center;
+    line-height:1;
+  }
+  .score-ring .num{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:30px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .result .sub{margin:0;color:var(--ink-2);font-size:15px}
+  .stats{
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+    margin-top:12px;
+  }
+  .stat{
+    background:var(--stat-bg,var(--p1));
+    color:var(--badge-ink);
+    border-radius:10px;
+    padding:9px 15px;
+    text-align:left;
+  }
+  .stat b{
+    display:block;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:17px;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;opacity:.75}
+
+  .review{margin-top:22px;display:flex;flex-direction:column;gap:9px}
+  .review h3{
+    margin:0 0 2px;
+    font-family:"Fraunces",Georgia,serif;
+    font-size:17px;font-weight:700;
+  }
+  .review-row{
+    display:flex;gap:11px;align-items:flex-start;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:4px solid var(--no-line);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:14.5px;
+  }
+  .review-row .n{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12.5px;font-weight:600;color:var(--ink-2);
+    flex:none;margin-top:2px;
+  }
+  .review-row .body{min-width:0}
+  .review-row .q{font-weight:700;display:block;margin-bottom:3px}
+  .review-row .a{color:var(--ink-2);display:block;font-size:13.5px}
+  .review-row .a b{color:var(--ok-ink);font-weight:700}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="eyebrow">Operations Analyst · Week 1</span>
+      <h1>Day 1 — Excel Foundations</h1>
+    </div>
+    <div class="meters">
+      <span class="pill pill--time" id="timer" aria-label="Elapsed time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/></svg>
+        <span id="time-text">00:00</span>
+      </span>
+      <span class="pill pill--count" aria-label="Question progress">
+        <span id="q-current">1</span><span class="sep">/</span><span id="q-total">25</span>
+      </span>
+    </div>
+  </div>
+  <div class="rail"><div class="rail-fill" id="rail"></div></div>
+</header>
+
+<main>
+  <section id="quiz-view">
+    <div class="card">
+      <div class="qhead">
+        <span class="qnum" id="qnum">Q01</span>
+        <h2 class="qtext" id="qtext">Loading…</h2>
+      </div>
+      <div class="options" id="options" role="group" aria-label="Answer choices"></div>
+      <div class="explain" id="explain" hidden>
+        <span class="verdict" id="verdict"></span>
+        <p id="explain-text"></p>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn--ghost" id="prev-btn" type="button">← Previous</button>
+      <button class="btn btn--primary" id="action-btn" type="button">Check Answer</button>
+    </div>
+    <p class="hint">Press <kbd>A</kbd>–<kbd>D</kbd> to choose · <kbd>Enter</kbd> to check and continue</p>
+  </section>
+
+  <section id="result-view" hidden></section>
+</main>
+
+<script>
+const QUESTIONS = [
+  {q:"What is the main purpose of a worksheet in Excel?",
+   o:["To create presentations","To organize and work with data","To browse the internet","To send emails"],a:1,
+   e:"A worksheet is the grid of rows and columns where you enter, store and work with data. Presentations belong in PowerPoint; Excel's job is the data itself."},
+  {q:"In Excel, the intersection of a row and a column is called a:",
+   o:["Table","Range","Cell","Worksheet"],a:2,
+   e:"A cell is the single box where one row meets one column. A range is a group of cells, and a table is a structured range with headers."},
+  {q:"Which reference represents column B and row 5?",
+   o:["5B","B5","B-5","Row5B"],a:1,
+   e:"Excel's A1 style always writes the column letter first, then the row number — so column B, row 5 is B5."},
+  {q:"What is the purpose of the Name Box in Excel?",
+   o:["To change the workbook name","To display or navigate to a cell reference","To format text","To create a chart"],a:1,
+   e:"The Name Box sits left of the formula bar. It shows the active cell's reference, and typing a reference or named range into it jumps straight there — handy in a 500-row transaction sheet."},
+  {q:"Which shortcut is commonly used to copy selected cells?",
+   o:["Ctrl + X","Ctrl + C","Ctrl + V","Ctrl + Z"],a:1,
+   e:"Ctrl + C copies. Ctrl + X cuts (removes the original), Ctrl + V pastes, and Ctrl + Z undoes."},
+  {q:"Which shortcut is used to paste copied data?",
+   o:["Ctrl + P","Ctrl + C","Ctrl + V","Ctrl + S"],a:2,
+   e:"Ctrl + V pastes. Ctrl + P opens Print and Ctrl + S saves — easy to hit by mistake when working fast."},
+  {q:"What does Ctrl + Z generally do in Excel?",
+   o:["Saves the workbook","Copies data","Undoes the previous action","Deletes a worksheet"],a:2,
+   e:"Ctrl + Z steps back through recent actions. Note that it will not bring back a deleted worksheet — that action clears the undo stack."},
+  {q:"Which action is most appropriate for changing 01/08/2026 into a consistent date format?",
+   o:["Apply Date formatting","Apply Currency formatting","Apply Text wrapping","Apply Sorting"],a:0,
+   e:"Date formatting makes every date display the same way (and keeps it a real date value), so the column can be sorted and filtered correctly."},
+  {q:"Which Excel format is most appropriate for a transaction amount such as 15000?",
+   o:["Currency","Date","Percentage","Text"],a:0,
+   e:"Currency formatting adds the symbol and thousands separator — 15000 reads as ₹15,000.00 — while keeping the underlying number usable in calculations."},
+  {q:"If you want to display 0.25 as 25%, which format should you apply?",
+   o:["Currency","Percentage","Date","General"],a:1,
+   e:"Percentage formatting multiplies the display by 100 and adds the % sign. The stored value stays 0.25, so formulas still work."},
+  {q:"What is the main purpose of formatting data?",
+   o:["To make data easier to read and interpret","To delete duplicate records","To automatically calculate formulas","To create new worksheets"],a:0,
+   e:"Formatting changes how values look, not what they are. It is about readability — removing duplicates and calculating are separate features."},
+  {q:"What does sorting data do?",
+   o:["Removes all blank cells","Arranges data according to selected criteria","Locks the worksheet","Creates a backup"],a:1,
+   e:"Sorting reorders rows by the column you choose — A to Z, smallest to largest, oldest to newest, or by colour."},
+  {q:"An Operations Analyst wants to arrange transaction amounts from highest to lowest. Which option should be used?",
+   o:["Sort Smallest to Largest","Sort Largest to Smallest","Filter by Color","Freeze Panes"],a:1,
+   e:"Largest to Smallest puts the biggest amounts on top — the usual first move when scanning for high-value or outlier transactions."},
+  {q:"What is the main purpose of filtering?",
+   o:["To permanently delete unwanted records","To temporarily display only records meeting selected criteria","To change cell colors","To create formulas"],a:1,
+   e:"A filter narrows the view to matching rows. Nothing is deleted — clear the filter and the full dataset is back."},
+  {q:"A dataset contains transactions for multiple branches. You want to view only BRN-01. What should you use?",
+   o:["Filter","Freeze Panes","Merge Cells","Wrap Text"],a:0,
+   e:"Apply a filter on the Branch column and tick only BRN-01. Freeze Panes controls scrolling, not which rows are shown."},
+  {q:"What happens to rows hidden by a filter?",
+   o:["They are permanently deleted","They are moved to another worksheet","They remain in the dataset but are temporarily hidden","They are automatically copied"],a:2,
+   e:"Filtered-out rows are still in the sheet — the row numbers skip, which is your clue a filter is on. Removing the filter restores the view."},
+  {q:"What is the purpose of Freeze Panes?",
+   o:["To prevent the workbook from opening","To keep selected rows or columns visible while scrolling","To freeze formulas permanently","To prevent data entry"],a:1,
+   e:"Freeze Panes pins the rows above and columns left of your selection so headers stay on screen as you scroll. It changes the view only, never the data."},
+  {q:"An analyst has 500 transaction records and wants the column headings to remain visible while scrolling down. What should they use?",
+   o:["Sort","Filter","Freeze Panes","Text to Columns"],a:2,
+   e:"Freeze Panes — specifically Freeze Top Row — keeps the header row visible so you always know which column you are reading at row 400."},
+  {q:"Which structure is generally most suitable for a transaction dataset?",
+   o:["One record per row and one field per column","Multiple records in one cell","Random information across merged cells","One entire dataset in a single cell"],a:0,
+   e:"One record per row, one field per column is the tidy-data rule. Every Excel feature — sorting, filtering, tables, PivotTables — assumes this shape."},
+  {q:"What is an Excel Table primarily useful for?",
+   o:["Organizing and managing structured data","Creating operating systems","Sending emails","Editing images"],a:0,
+   e:"An Excel Table (Ctrl + T) gives structured data banded rows, automatic filter buttons, named column references in formulas, and a range that grows as you add rows."},
+  {q:"Which is a good practice when structuring data into an Excel Table?",
+   o:["Use clear column headers","Merge all cells","Leave multiple blank rows inside the dataset","Put several unrelated fields in one column"],a:0,
+   e:"Clear, unique headers are what Excel uses to name each column in filters and formulas. Merged cells and blank rows break selection, sorting and PivotTables."},
+  {q:"An engagement tracker is primarily used by an Operations Analyst to:",
+   o:["Track work, projects, clients, activities, and status","Create computer programs","Design websites","Store passwords"],a:0,
+   e:"An engagement tracker is the working record of what is being done, for whom, by whom and where it stands — the analyst's main reporting source."},
+  {q:"Which set of columns would be most useful in a project-level engagement tracker?",
+   o:["Project, Activity, Owner, Start Date, Due Date, Status","Movie, Actor, Director, Rating","Product, Color, Size, Brand","Employee, Hobby, Favorite Food, Age"],a:0,
+   e:"Those six answer the questions a tracker exists to answer: what work, under which project, owned by whom, running between which dates, and at what stage."},
+  {q:"An analyst wants to identify all activities that are currently “In Progress” for a particular client. Which Excel features would be most useful?",
+   o:["Filter by Client and Status","Currency formatting only","Freeze Panes only","Cell merging"],a:0,
+   e:"Filtering on two columns at once narrows the view to that client's in-progress work. Formatting and Freeze Panes change appearance, not which rows you see."},
+  {q:"Which practice makes an engagement tracker easier to maintain and analyze?",
+   o:["Use consistent values for Status, such as Not Started, In Progress, and Completed","Use different spellings such as Complete, completed, and Done randomly","Merge cells across multiple projects","Enter several activities in one cell"],a:0,
+   e:"A fixed set of status values (best enforced with Data Validation) means filters and counts return the truth. “Complete”, “completed” and “Done” are three different values to Excel."}
+];
+
+const PASTELS = ["var(--p1)","var(--p2)","var(--p3)","var(--p4)","var(--p5)"];
+const LETTERS = ["A","B","C","D","E","F"];
+const PRAISE = ["Exactly right.","Nailed it.","Correct.","That's the one.","Spot on."];
+const NUDGE  = ["Not quite.","Close, but no.","Not this time.","Missed that one.","Try again next round."];
+
+let idx = 0;
+let picked = new Array(QUESTIONS.length).fill(null);
+let locked = new Array(QUESTIONS.length).fill(false);
+let seconds = 0;
+let ticking = true;
+
+const $ = id => document.getElementById(id);
+
+/* ---------- timer ---------- */
+function fmt(s){
+  const m = String(Math.floor(s/60)).padStart(2,"0");
+  const r = String(s%60).padStart(2,"0");
+  return m + ":" + r;
+}
+setInterval(() => {
+  if(!ticking) return;
+  seconds++;
+  $("time-text").textContent = fmt(seconds);
+}, 1000);
+
+/* ---------- render ---------- */
+function render(){
+  const item = QUESTIONS[idx];
+  const isLocked = locked[idx];
+
+  $("q-current").textContent = idx + 1;
+  $("q-total").textContent = QUESTIONS.length;
+  $("rail").style.width = ((idx + (isLocked ? 1 : 0)) / QUESTIONS.length * 100) + "%";
+
+  const badge = $("qnum");
+  badge.textContent = "Q" + String(idx + 1).padStart(2,"0");
+  badge.style.setProperty("--badge-bg", PASTELS[idx % PASTELS.length]);
+
+  $("qtext").textContent = item.q;
+
+  const box = $("options");
+  box.textContent = "";
+  item.o.forEach((text, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "opt";
+    b.id = "q" + idx + "-opt" + i;
+    b.setAttribute("aria-pressed", String(picked[idx] === i));
+    b.disabled = isLocked;
+
+    const key = document.createElement("span");
+    key.className = "key";
+    key.textContent = LETTERS[i];
+
+    const label = document.createElement("span");
+    label.className = "label";
+    label.textContent = text;
+
+    const mark = document.createElement("span");
+    mark.className = "mark";
+
+    if(isLocked){
+      if(i === item.a){ b.classList.add("is-correct"); mark.textContent = "✓"; }
+      else if(i === picked[idx]){ b.classList.add("is-wrong"); mark.textContent = "✕"; }
+      else { b.classList.add("is-dim"); }
+    }
+
+    b.append(key, label, mark);
+    b.addEventListener("click", () => choose(i));
+    box.append(b);
+  });
+
+  const panel = $("explain");
+  if(isLocked){
+    const right = picked[idx] === item.a;
+    panel.hidden = false;
+    panel.style.setProperty("--verdict-bg", right ? "var(--ok-bg)" : "var(--no-bg)");
+    panel.style.setProperty("--verdict-line", right ? "var(--ok-line)" : "var(--no-line)");
+    panel.style.setProperty("--verdict-ink", right ? "var(--ok-ink)" : "var(--no-ink)");
+    $("verdict").textContent = right ? PRAISE[idx % PRAISE.length] : NUDGE[idx % NUDGE.length];
+    $("explain-text").textContent = (right ? "" : "Correct answer: " + LETTERS[item.a] + " — " + item.o[item.a] + ". ") + item.e;
+  } else {
+    panel.hidden = true;
+  }
+
+  $("prev-btn").disabled = idx === 0;
+  const action = $("action-btn");
+  if(!isLocked){
+    action.textContent = "Check Answer";
+    action.disabled = picked[idx] === null;
+  } else {
+    action.textContent = idx === QUESTIONS.length - 1 ? "See Results" : "Next Question →";
+    action.disabled = false;
+  }
+}
+
+function choose(i){
+  if(locked[idx]) return;
+  picked[idx] = i;
+  render();
+}
+
+function act(){
+  if(!locked[idx]){
+    if(picked[idx] === null) return;
+    locked[idx] = true;
+    render();
+  } else if(idx < QUESTIONS.length - 1){
+    idx++;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  } else {
+    finish();
+  }
+}
+
+/* ---------- results ---------- */
+function finish(){
+  ticking = false;
+  const score = QUESTIONS.reduce((n,q,i) => n + (picked[i] === q.a ? 1 : 0), 0);
+  const pct = Math.round(score / QUESTIONS.length * 100);
+  const missed = QUESTIONS.map((q,i) => ({q,i})).filter(({q,i}) => picked[i] !== q.a);
+
+  $("rail").style.width = "100%";
+  $("quiz-view").hidden = true;
+
+  const verdict =
+    pct === 100 ? "Perfect run — Day 1 foundations are solid." :
+    pct >= 80 ? "Strong grip on the fundamentals." :
+    pct >= 60 ? "Good base — revisit the topics below." :
+    "Worth another pass through Day 1.";
+
+  const view = $("result-view");
+  view.hidden = false;
+  view.innerHTML =
+    '<div class="result">' +
+      '<h2>Quiz complete</h2>' +
+      '<div class="score-ring" style="--pct:' + pct + '"><div class="inner"><span class="num">' + pct + '%</span></div></div>' +
+      '<p class="sub">' + verdict + '</p>' +
+      '<div class="stats">' +
+        '<div class="stat" style="--stat-bg:var(--p1)"><b>' + score + '</b><span>Correct</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p2)"><b>' + (QUESTIONS.length - score) + '</b><span>Incorrect</span></div>' +
+        '<div class="stat" style="--stat-bg:var(--p5)"><b>' + fmt(seconds) + '</b><span>Time taken</span></div>' +
+      '</div>' +
+      '<div class="nav" style="justify-content:center">' +
+        '<button class="btn btn--ghost" id="review-btn" type="button">Review answers</button>' +
+        '<button class="btn btn--primary" id="restart-btn" type="button">Restart quiz</button>' +
+      '</div>' +
+    '</div>' +
+    (missed.length ? '<div class="review"><h3>Questions to revisit (' + missed.length + ')</h3>' +
+      missed.map(({q,i}) =>
+        '<div class="review-row"><span class="n">Q' + String(i+1).padStart(2,"0") + '</span><div class="body">' +
+        '<span class="q"></span><span class="a">Correct answer: <b></b></span></div></div>'
+      ).join("") + '</div>' : "");
+
+  // fill missed text safely
+  const rows = view.querySelectorAll(".review-row");
+  missed.forEach(({q,i}, n) => {
+    rows[n].querySelector(".q").textContent = q.q;
+    rows[n].querySelector(".a b").textContent = LETTERS[q.a] + " — " + q.o[q.a];
+  });
+
+  $("restart-btn").addEventListener("click", restart);
+  $("review-btn").addEventListener("click", () => {
+    idx = 0;
+    $("result-view").hidden = true;
+    $("quiz-view").hidden = false;
+    render();
+    window.scrollTo({top:0, behavior:"smooth"});
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function restart(){
+  idx = 0;
+  picked = new Array(QUESTIONS.length).fill(null);
+  locked = new Array(QUESTIONS.length).fill(false);
+  seconds = 0;
+  ticking = true;
+  $("time-text").textContent = "00:00";
+  $("result-view").hidden = true;
+  $("quiz-view").hidden = false;
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ---------- wiring ---------- */
+$("action-btn").addEventListener("click", act);
+$("prev-btn").addEventListener("click", () => {
+  if(idx > 0){ idx--; render(); window.scrollTo({top:0, behavior:"smooth"}); }
+});
+
+document.addEventListener("keydown", e => {
+  if($("quiz-view").hidden) return;
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key.toUpperCase();
+  const n = LETTERS.indexOf(k);
+  if(n > -1 && n < QUESTIONS[idx].o.length){ e.preventDefault(); choose(n); return; }
+  if(e.key === "Enter"){ e.preventDefault(); act(); return; }
+  if(e.key === "ArrowLeft" && idx > 0){ idx--; render(); }
+});
+
+render();
+</script>
+</body>
+</html>
